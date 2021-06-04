@@ -4,8 +4,6 @@ import { simulate } from '../services/sim'
 export const Simulate: Middleware = async (context, message, next) => {
     const isSimCommand = !message.content.startsWith('!sim')
 
-    console.log(isSimCommand)
-
     if (isSimCommand) {
         return next()
     }
@@ -13,7 +11,9 @@ export const Simulate: Middleware = async (context, message, next) => {
     const [, character, ...rest] = message.content.split(' ')
     const realm = rest.join(' ')
 
-    
+    if (!character || !realm) {
+        return next()
+    }
 
     const instance = await simulate({ realm, character, region: 'eu', update: updateReply })
 
