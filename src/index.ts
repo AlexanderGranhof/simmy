@@ -3,12 +3,13 @@ dotenv.config()
 
 import Discord from 'discord.js'
 import Pipeline from './services/pipeline'
-import { Validate } from './middleware'
+import { Validate, Simulate } from './middleware'
 
 const client = new Discord.Client()
 
 const pipeline = Pipeline(
     Validate,
+    Simulate
 )
 
 pipeline.error(
@@ -24,6 +25,7 @@ client.once('ready', () => {
 })
 
 client.on('message', (message) => {
+    console.log(message)
     pipeline.execute({}, message)
 })
 
