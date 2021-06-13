@@ -6,19 +6,19 @@ import crypto from 'crypto'
 
 const sha256 = (d: string) => crypto.createHash('sha256').update(d).digest('hex')
 
-type Client = {
+export type Client = {
     discordID: string
     realm: string
     character: string
 }
 
-type Contestant = {
+export type Contestant = {
     id: string,
     character: string,
     realm: string
 }
 
-type DatabaseModel = {
+export type DatabaseModel = {
     clients: Client[],
     contestants: Contestant[]
 }
@@ -63,7 +63,7 @@ export class Database {
             await this.db.write()
             return
         }
-        
+
         await clients.push(newData).value()
         await this.db.write()
     }
@@ -91,7 +91,7 @@ export class Database {
             await this.db.write()
             return
         }
-        
+
         await clients.push(newData).value()
         await this.db.write()
     }
@@ -99,7 +99,7 @@ export class Database {
     async getContestants() {
         this.verifyConnected()
         await this.db.read()
-        
+
         return await this.db.get('contestants').value()
     }
 }
