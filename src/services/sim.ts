@@ -9,6 +9,7 @@ type SimOptions = {
 }
 
 const parseNumber = (text: any): string => {
+    console.log('cutting', { text })
     return text.toString().replace(/\D/, '')
 }
 
@@ -23,9 +24,9 @@ export const simulate = async ({ realm, character, region, update }: SimOptions)
 
     await page.goto(url);
     await page.waitForSelector('svg[data-id=geomicon-refresh]')
-    
+
     const isInvalidSpec = await page.$('svg[data-id="geomicon-warning"]') !== null
-    
+
 
     if (isInvalidSpec) {
         await browser.close();
@@ -33,38 +34,57 @@ export const simulate = async ({ realm, character, region, update }: SimOptions)
         return null
     }
 
-    
+
     await page.click('button > div > div')
-    await page.waitForSelector('.Badge', { timeout: 10000 }) // 10s
-    
+    try {
+        await page.waitForSelector('.Badge', { timeout: 10000 }) // 10s
+    } catch (err) {
+        console.log(err)
+        await page.screenshot({ path: 'badge.png' })
+        process.exit(1)
+    }
+
     const reportID = page.url().split('/').pop()
     const reportURL = `https://www.raidbots.com/simbot/report/${reportID}`
 
     const simDPS = async () => {
-        await page.waitForSelector('.Badge')
-
         const interval = setInterval(async () => {
             try {
-                const [queue, total] = parseNumber(await page.$eval('.Badge', el => el.textContent.replace(/\D/, ''))).split('/')
-                
+                const queue = await page.$eval('.Badge', el => el.textContent.replace(/\D/, '')) as unknown as string
+
+                if (!queue.includes("/")) {
+                    console.log('no longer a queue')
+
+                    return clearInterval(interval)
+                }
+
+                const [position, total] = parseNumber(queue).split(' ')
+
                 update?.({
-                    queue: queue.trim(),
+                    position: position.trim(),
                     total: total.trim()
                 })
             } catch (err) {
-                console.warn('unable to read queue')
+                // console.log(err)
+                // await page.screenshot({ path: 'error.png' })
+                // console.warn('unable to read queue')
             }
         }, 2000)
 
+        console.log('waiting for wow icon')
         await page.waitForSelector('img[src="/images/icon-wow.png"]', { timeout: 300000 }) // 5min
-        
+
         const dps = parseInt(parseNumber(await page.$eval('div > h1 + h2', el => el.textContent.replace(/\D/, ''))))
-      
+        const preview = `https://www.raidbots.com/simbot/report/${reportID}/preview.png`
+
+        console.log({ preview })
+
         clearInterval(interval)
         await browser.close();
-    
+
         return {
-            dps
+            dps,
+            preview
         }
     }
 
