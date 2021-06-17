@@ -30,7 +30,7 @@ BotCommandPipeline.error(
 client.once('ready', () => {
     console.log('Discord bot is ready!')
 
-    const contestantChannel = '824658178712404061'
+    const contestantChannel = '847257682984435712'
 
     client.channels.fetch(contestantChannel).then(c => {
         if (c instanceof TextChannel) {
@@ -86,7 +86,7 @@ client.once('ready', () => {
                 console.log(sortedSims)
             }
 
-            schedule.scheduleJob('0 */2 * * *', simJob); // every 2 hours
+            schedule.scheduleJob('0 */1 * * *', simJob); // every hour
         }
     }).catch(console.error)
 
