@@ -9,13 +9,15 @@ const sha256 = (d: string) => crypto.createHash('sha256').update(d).digest('hex'
 export type Client = {
     discordID: string
     realm: string
-    character: string
+    character: string,
+    simc?: string
 }
 
 export type Contestant = {
     id: string,
     character: string,
-    realm: string
+    realm: string,
+    simc?: string
 }
 
 export type DatabaseModel = {
@@ -94,6 +96,14 @@ export class Database {
 
         await clients.push(newData).value()
         await this.db.write()
+    }
+
+    async setSimc(id: string, character: string, simc: string) {
+        this.verifyConnected()
+
+        const clients = await this.db.get('contestants')
+
+        await clients.find({ id, character: slug(character) }).assign({ simc }).value()
     }
 
     async getContestants() {
