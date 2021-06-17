@@ -20,7 +20,7 @@ export const simulate = async ({ realm, character, region, simc, update }: SimOp
 
     const url = `https://www.raidbots.com/simbot/quick?region=${region}&realm=${realmSlug}&name=${characterSlug}`
 
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
     const page = await browser.newPage();
 
     await page.goto(url);
