@@ -14,13 +14,19 @@ export const Simc: Middleware = async (context, message, next) => {
         return next()
     }
 
-    const [, character, simc] = message.content.split(' ')
+    const [, character, ...rest] = message.content.split(' ')
+    const simc = rest.join(' ')
 
 
     if (!character || !simc) {
         return next()
     }
 
-    await db.setSimc(message.author.id, character, simc)
+    const success = await db.setSimc(message.author.id, character, simc)
+
+    if (!success) {
+        return await message.reply(`${slug(character)} was not found as a contestant`)
+    }
+
     await message.reply(`${slug(character)} simc string has been updated`)
 }
