@@ -3,10 +3,10 @@ dotenv.config()
 
 import Discord, { TextChannel } from 'discord.js'
 import Pipeline from './services/pipeline'
-import { Validate, Simulate, Link, Add } from './middleware'
+import { Validate, Simulate, Link, Add, Simc, Fallback } from './middleware'
 import schedule from 'node-schedule'
 import { simAll } from './jobs/simAll'
-
+import fetch from 'node-fetch'
 
 const client = new Discord.Client()
 
@@ -14,7 +14,9 @@ const BotCommandPipeline = Pipeline(
     Validate,
     Simulate,
     Link,
-    Add
+    Add,
+    Simc,
+    Fallback
 )
 
 BotCommandPipeline.error(
@@ -30,12 +32,21 @@ client.once('ready', () => {
 
     const contestantChannel = '847257682984435712'
 
-
     client.channels.fetch(contestantChannel).then(c => {
         if (c instanceof TextChannel) {
             console.log('started')
 
             const simJob = async () => {
+                const messages = await c.messages.fetch({ limit: 50 })
+
+                const deletePromises = messages.map(message => {
+                    if (!message.author.bot) return
+
+                    return message.delete()
+                })
+
+                await Promise.all(deletePromises)
+
                 const simMessage = await c.send('Starting sim...')
 
                 let simStatus = ''
@@ -49,8 +60,6 @@ client.once('ready', () => {
                 }, 1500)
 
                 const sims = await simAll(onStatus)
-
-                console.log(sims)
 
                 clearInterval(interval)
 
@@ -74,9 +83,10 @@ client.once('ready', () => {
                 await Promise.all(embedPromises)
 
                 console.log('done')
+                console.log(sortedSims)
             }
 
-            // schedule.scheduleJob('*/5 * * * *', simJob);
+            schedule.scheduleJob('0 */2 * * *', simJob); // every 2 hours
 
             simJob()
         }
@@ -87,8 +97,27 @@ client.once('ready', () => {
 
 
 
-client.on('message', (message) => {
-    console.log(message.content, message.author, message.channel)
+client.on('message', async (message) => {
+    const isAllowed = message.member?.roles.cache.some(r => r.name === "Adhocrat")
+
+    if (!isAllowed) {
+        if (message.channel.type === 'dm') {
+            await message.reply('Im not allowed to speak to you :(')
+        }
+
+        return
+    }
+
+    if (message.attachments) {
+        const file = message.attachments.first()
+
+        if (file) {
+            const data = await (await fetch(file.attachment.toString())).text()
+
+            message.content = data
+        }
+    }
+
     BotCommandPipeline.execute({}, message)
 })
 
