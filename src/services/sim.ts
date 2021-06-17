@@ -40,10 +40,10 @@ export const simulate = async ({ realm, character, region, simc, update }: SimOp
         await page.keyboard.type(simc)
     }
 
-
     await page.click('button > div > div')
+
     try {
-        await page.waitForSelector('.Badge', { timeout: 10000 }) // 10s
+        await page.waitForSelector('.Badge', { timeout: 15000 }) // 15s
     } catch (err) {
         console.log(err)
         await page.screenshot({ path: 'badge.png' })
@@ -82,8 +82,6 @@ export const simulate = async ({ realm, character, region, simc, update }: SimOp
 
         const dps = parseInt(parseNumber(await page.$eval('div > h1 + h2', el => el.textContent.replace(/\D/, ''))))
         const preview = `https://www.raidbots.com/simbot/report/${reportID}/preview.png`
-
-        console.log({ preview })
 
         clearInterval(interval)
         await browser.close();
