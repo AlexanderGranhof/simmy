@@ -23,6 +23,4 @@ export const Simc: Middleware = async (context, message, next) => {
 
     await db.setSimc(message.author.id, character, simc)
     await message.reply(`${slug(character)} simc string has been updated`)
-
-    return next()
 }

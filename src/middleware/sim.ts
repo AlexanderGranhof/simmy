@@ -2,7 +2,7 @@ import { Middleware } from '../services/pipeline'
 import { simulate } from '../services/sim'
 
 export const Simulate: Middleware = async (context, message, next) => {
-    const isSimCommand = !message.content.startsWith('!sim')
+    const isSimCommand = !message.content.startsWith('!sim ')
 
     if (isSimCommand) {
         return next()
@@ -34,9 +34,7 @@ export const Simulate: Middleware = async (context, message, next) => {
     await reply.delete()
 
     await message.reply(
-        `Simulation done. ${(await sim).dps.toLocaleString()} DPS\n` + 
+        `Simulation done. ${(await sim).dps.toLocaleString()} DPS\n` +
         `${reportURL}`
     )
-
-    return next()
 }

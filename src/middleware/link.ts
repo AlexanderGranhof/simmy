@@ -23,6 +23,4 @@ export const Link: Middleware = async (context, message, next) => {
 
     await db.addClient(message.author.id, character, realm)
     await message.reply(`${slug(character)}-${slug(realm)} has been linked to your discord account`)
-
-    return next()
 }

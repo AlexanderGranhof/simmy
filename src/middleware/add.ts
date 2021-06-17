@@ -24,6 +24,4 @@ export const Add: Middleware = async (context, message, next) => {
 
     await db.addContestant(character, realm)
     await message.reply(`${slug(character)}-${slug(realm)} has been added as a contestant`)
-
-    return next()
 }
