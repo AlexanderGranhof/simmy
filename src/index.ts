@@ -30,7 +30,7 @@ BotCommandPipeline.error(
 client.once('ready', () => {
     console.log('Discord bot is ready!')
 
-    const contestantChannel = '847257682984435712'
+    const contestantChannel = '824658178712404061'
 
     client.channels.fetch(contestantChannel).then(c => {
         if (c instanceof TextChannel) {
@@ -87,8 +87,6 @@ client.once('ready', () => {
             }
 
             schedule.scheduleJob('0 */2 * * *', simJob); // every 2 hours
-
-            simJob()
         }
     }).catch(console.error)
 
@@ -98,7 +96,13 @@ client.once('ready', () => {
 
 
 client.on('message', async (message) => {
-    const isAllowed = message.member?.roles.cache.some(r => r.name === "Adhocrat")
+    // const isAllowed = message.member?.roles.cache.some(r => r.name === "Adhocrat")
+    const isAllowed = message.author.id === '254346113430061066'
+    const isBot = message.author.bot
+
+    if (isBot) {
+        return
+    }
 
     if (!isAllowed) {
         if (message.channel.type === 'dm') {
