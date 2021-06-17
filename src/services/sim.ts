@@ -4,7 +4,8 @@ import slug from 'slug'
 type SimOptions = {
     realm: string
     character: string
-    region: string
+    region: string,
+    simc?: string
     update?: (data: any) => void
 }
 
@@ -13,7 +14,7 @@ const parseNumber = (text: any): string => {
     return text.toString().replace(/\D/, '')
 }
 
-export const simulate = async ({ realm, character, region, update }: SimOptions) => {
+export const simulate = async ({ realm, character, region, simc, update }: SimOptions) => {
     const realmSlug = slug(realm)
     const characterSlug = slug(character)
 
@@ -32,6 +33,11 @@ export const simulate = async ({ realm, character, region, update }: SimOptions)
         await browser.close();
 
         return null
+    }
+
+    if (simc) {
+        await page.focus("#SimcUserInput-input")
+        await page.keyboard.type(simc)
     }
 
 
