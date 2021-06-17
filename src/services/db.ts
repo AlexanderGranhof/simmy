@@ -14,6 +14,7 @@ export type Client = {
 }
 
 export type Contestant = {
+    discordid: string
     id: string,
     character: string,
     realm: string,
@@ -77,12 +78,12 @@ export class Database {
         return await this.db.get('clients').find({ discordID }).value()
     }
 
-    async addContestant(character: string, realm: string) {
+    async addContestant(discordid: string, character: string, realm: string) {
         this.verifyConnected()
 
         const id = sha256(slug(character) + slug(realm))
 
-        const newData = { id, character: slug(character), realm: slug(realm) }
+        const newData = { id, character: slug(character), realm: slug(realm), discordid }
 
         const clients = await this.db.get('contestants')
         const exists = !!await clients.find({ id }).value()
@@ -98,12 +99,20 @@ export class Database {
         await this.db.write()
     }
 
-    async setSimc(id: string, character: string, simc: string) {
+    async setSimc(discordid: string, character: string, simc: string) {
         this.verifyConnected()
 
         const clients = await this.db.get('contestants')
 
-        await clients.find({ id, character: slug(character) }).assign({ simc }).value()
+        const result = await clients.find({ discordid, character: slug(character) }).assign({ simc }).value()
+
+        if (!result.id) {
+            return false
+        }
+
+        await this.db.write()
+
+        return true
     }
 
     async getContestants() {
